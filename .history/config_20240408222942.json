@@ -1,0 +1,53 @@
+{
+  "readmeUrl": "https://raw.githubusercontent.com/cveinnt/cveinnt/master/README.md",
+  "title": "Shiyang's Terminal",
+  "name": "shiyang (lucas) lai",
+  "ascii": "shiyang",
+  "social": {
+    "github": "github",
+    "linkedin": "shiyang-lai-230365213",
+    "linedin_name": "shiyang-lai"
+  },
+  "email": "shiyanglai@uchicago.edu",
+  "ps1_hostname": "shiyang_home",
+  "ps1_username": "visitor",
+  "repo": "https://github.com/ShiyangLai",
+  "google_scholar": "https://scholar.google.com/citations?user=qALDmfcAAAAJ&hl=en",
+  "resume_url": "",
+  "donate_urls": {
+    "paypal": "https://paypal.me/cveinnt",
+    "patreon": "https://patreon.com/cveinnt"
+  },
+  "colors": {
+    "dark": {
+      "background": "#2E3440",
+      "foreground": "#E5E9F0",
+      "yellow": "#5E81AC",
+      "green": "#A3BE8C",
+      "gray": "#88C0D0",
+      "blue": "#EBCB8B",
+      "red": "#BF616A"
+    },
+    "light": {
+      "background": "#FAFAFA",
+      "foreground": "#80CBC4",
+      "ansiBlack": "#FAFAFA",
+      "ansiBlue": "#6182B8",
+      "ansiBrightBlack":"#CCD7DA",
+      "ansiBrightBlue":"#6182B8",
+      "ansiBrightCyan":"#39ADB5",
+      "ansiBrightGreen":"#91B859",
+      "ansiBrightMagenta":"#7C4DFF",
+      "ansiBrightRed":"#FF5370",
+      "ansiBrightWhite":"#FFFFFF",
+      "ansiBrightYellow":"#FFB62C",
+      "ansiCyan":"#39ADB5",
+      "ansiGreen":"#91B859",
+      "ansiMagenta":"#7C4DFF",
+      "ansiRed":"#FF5370",
+      "ansiWhite":"#80CBC4",
+      "ansiYellow":"#FFB62C"
+    }
+  }
+}
+
