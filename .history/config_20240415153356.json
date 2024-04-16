@@ -1,0 +1,64 @@
+{
+  "readmeUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/master/src/pages/readme.txt",
+  "title": "Shiyang's Terminal",
+  "name": "shiyang (lucas) lai",
+  "ascii": "shiyang",
+  "social": {
+    "github": "github",
+    "linkedin": "shiyang-lai-230365213",
+    "linedin_name": "shiyang-lai"
+  },
+  "email": "shiyanglai@uchicago.edu",
+  "ps1_hostname": "shiyang_home",
+  "ps1_username": "visitor",
+  "repo": "https://github.com/ShiyangLai",
+  "google_scholar": "https://scholar.google.com/citations?user=qALDmfcAAAAJ&hl=en",
+  "resume_url": "",
+  "colors": {
+    "dark": {
+      "terminal.background":"#FEFBEC",
+      "terminal.foreground":"#6E6B5E",
+      "terminalCursor.background":"#6E6B5E",
+      "terminalCursor.foreground":"#6E6B5E",
+      "terminal.ansiBlack":"#FEFBEC",
+      "terminal.ansiBlue":"#6684E1",
+      "terminal.ansiBrightBlack":"#999580",
+      "terminal.ansiBrightBlue":"#6684E1",
+      "terminal.ansiBrightCyan":"#1FAD83",
+      "terminal.ansiBrightGreen":"#60AC39",
+      "terminal.ansiBrightMagenta":"#B854D4",
+      "terminal.ansiBrightRed":"#D73737",
+      "terminal.ansiBrightWhite":"#20201D",
+      "terminal.ansiBrightYellow":"#AE9513",
+      "terminal.ansiCyan":"#1FAD83",
+      "terminal.ansiGreen":"#60AC39",
+      "terminal.ansiMagenta":"#B854D4",
+      "terminal.ansiRed":"#D73737",
+      "terminal.ansiWhite":"#6E6B5E",
+      "terminal.ansiYellow":"#AE9513"
+    },
+    "light": {
+      "background":"#F5F7FF",
+      "foreground":"#5E6687",
+      "Cursor.background":"#5E6687",
+      "Cursor.foreground":"#5E6687",
+      "ansiBlack":"#F5F7FF",
+      "ansiBlue":"#3D8FD1",
+      "terminal.ansiBrightBlack":"#898EA4",
+      "terminal.ansiBrightBlue":"#3D8FD1",
+      "terminal.ansiBrightCyan":"#22A2C9",
+      "terminal.ansiBrightGreen":"#AC9739",
+      "terminal.ansiBrightMagenta":"#6679CC",
+      "terminal.ansiBrightRed":"#C94922",
+      "terminal.ansiBrightWhite":"#202746",
+      "terminal.ansiBrightYellow":"#C08B30",
+      "terminal.ansiCyan":"#22A2C9",
+      "terminal.ansiGreen":"#AC9739",
+      "terminal.ansiMagenta":"#6679CC",
+      "terminal.ansiRed":"#C94922",
+      "terminal.ansiWhite":"#5E6687",
+      "terminal.ansiYellow":"#C08B30"
+    }
+  }
+}
+

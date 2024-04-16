@@ -1,0 +1,64 @@
+{
+  "readmeUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/master/src/pages/readme.txt",
+  "title": "Shiyang's Terminal",
+  "name": "shiyang (lucas) lai",
+  "ascii": "shiyang",
+  "social": {
+    "github": "github",
+    "linkedin": "shiyang-lai-230365213",
+    "linedin_name": "shiyang-lai"
+  },
+  "email": "shiyanglai@uchicago.edu",
+  "ps1_hostname": "shiyang_home",
+  "ps1_username": "visitor",
+  "repo": "https://github.com/ShiyangLai",
+  "google_scholar": "https://scholar.google.com/citations?user=qALDmfcAAAAJ&hl=en",
+  "resume_url": "",
+  "colors": {
+    "dark": {
+      "background":"#0B1C2C",
+      "foreground":"#CBD6E2",
+      "terminalCursor.background":"#CBD6E2",
+      "terminalCursor.foreground":"#CBD6E2",
+      "terminal.ansiBlack":"#0B1C2C",
+      "terminal.ansiBlue":"#8B56BF",
+      "terminal.ansiBrightBlack":"#627E99",
+      "terminal.ansiBrightBlue":"#8B56BF",
+      "terminal.ansiBrightCyan":"#568BBF",
+      "terminal.ansiBrightGreen":"#56BF8B",
+      "terminal.ansiBrightMagenta":"#BF568B",
+      "terminal.ansiBrightRed":"#BF8B56",
+      "terminal.ansiBrightWhite":"#F7F9FB",
+      "terminal.ansiBrightYellow":"#8BBF56",
+      "terminal.ansiCyan":"#568BBF",
+      "terminal.ansiGreen":"#56BF8B",
+      "terminal.ansiMagenta":"#BF568B",
+      "terminal.ansiRed":"#BF8B56",
+      "terminal.ansiWhite":"#CBD6E2",
+      "terminal.ansiYellow":"#8BBF56"
+    },
+    "light": {
+      "background":"#F7F9FB",
+      "foreground":"#405C79",
+      "terminalCursor.background":"#405C79",
+      "terminalCursor.foreground":"#405C79",
+      "terminal.ansiBlack":"#F7F9FB",
+      "terminal.ansiBlue":"#8B56BF",
+      "terminal.ansiBrightBlack":"#AABCCE",
+      "terminal.ansiBrightBlue":"#8B56BF",
+      "terminal.ansiBrightCyan":"#568BBF",
+      "terminal.ansiBrightGreen":"#56BF8B",
+      "terminal.ansiBrightMagenta":"#BF568B",
+      "terminal.ansiBrightRed":"#BF8B56",
+      "terminal.ansiBrightWhite":"#0B1C2C",
+      "terminal.ansiBrightYellow":"#8BBF56",
+      "terminal.ansiCyan":"#568BBF",
+      "terminal.ansiGreen":"#56BF8B",
+      "terminal.ansiMagenta":"#BF568B",
+      "terminal.ansiRed":"#BF8B56",
+      "terminal.ansiWhite":"#405C79",
+      "terminal.ansiYellow":"#8BBF56"
+    }
+  }
+}
+
