@@ -1,0 +1,20 @@
+|--------------------------------------------------------------------------------------------|
+|                                         WHO AM I                                           |
+|  I'm Shiyang Lai. I'm a 1st year Ph.D. student at the Sociology department of the Universi-|
+|ty of Chicago. I'm also a visiting fellow at the Kellogg School of Management at Northweste-|
+|rn University.                                                                              |
+|                                                                                            |
+|                                    MY RESEARCH AGENDA                                      |
+|  I do research under three topics:                                                         |
+|    a) Human-AI Ecology                                                                     |
+|       I develop free-formed AI collectives and explore an ecological solution to superalig-|
+|       nment, existential risks, and Human-AI co-evolution. For more details, check my proj-|
+|       ect folder: `cd projects/eco-ai/`.                                                   |                                         
+|    b) A Quantum Explanation of the Scoial World                                            |
+|       I scratch the Theory of Social Superposition to explain complex, multi-facet social  |
+|       entities and the interaction between observation and social realities. In this theory|
+|       , I model social entities as Schrödinger's cats and social world as a manifold compr-|
+|       ising multiple coupled sub-social systems... For more details, check my project fold-|
+|       er: `cd projects/soc_sup/`.                                                          |
+|    c) Science of Science                                                                   |
+|       I predict 
