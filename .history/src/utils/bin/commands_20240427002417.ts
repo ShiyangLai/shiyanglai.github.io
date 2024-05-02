@@ -110,7 +110,7 @@ directories`;
 
 export const cd = async (args: string[]): Promise<string> => {
   return `unfortunately, i cannot afford more directories.
-the website development is still in progress...`;
+the website development is still in progress.`;
 };
 
 export const date = async (args: string[]): Promise<string> => {
