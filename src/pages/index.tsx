@@ -18,6 +18,8 @@ const IndexPage: React.FC<IndexPageProps> = ({ inputRef }) => {
     lastCommandIndex,
     setCommand,
     setHistory,
+    appendEntry,
+    updateEntry,
     clearHistory,
     setLastCommandIndex,
   } = useHistory([]);
@@ -66,6 +68,8 @@ const IndexPage: React.FC<IndexPageProps> = ({ inputRef }) => {
             lastCommandIndex={lastCommandIndex}
             setCommand={setCommand}
             setHistory={setHistory}
+            appendEntry={appendEntry}
+            updateEntry={updateEntry}
             setLastCommandIndex={setLastCommandIndex}
             clearHistory={clearHistory}
           />
