@@ -1,13 +1,20 @@
 import React from 'react';
 import * as bin from './bin';
-import { snapshotPrompt } from './vfs';
-import { isAgentActive, handleAgentInput, exitAgent } from './agentSession';
+import { snapshotPrompt, getPromptSnapshot } from './vfs';
+import {
+  isAgentActive,
+  streamAgent,
+  exitAgent,
+  resetAgent,
+} from './agentSession';
 
 export const shell = async (
   command: string,
   setHistory: (value: string) => void,
   clearHistory: () => void,
   setCommand: React.Dispatch<React.SetStateAction<string>>,
+  appendEntry: (command: string, output: string, ps1: string) => number,
+  updateEntry: (id: number, output: string) => void,
 ) => {
   // Capture the prompt's directory BEFORE running the command, so the history
   // line shows where the command was typed (a `cd` only affects later lines).
@@ -24,9 +31,20 @@ export const shell = async (
     } else if (lower === 'exit' || lower === 'quit') {
       exitAgent();
       setHistory("Left agent mode. Type 'help' for commands.");
+    } else if (lower === 'reset') {
+      resetAgent();
+      setHistory('(conversation cleared — starting fresh)');
     } else {
-      const reply = await handleAgentInput(command);
-      setHistory(reply);
+      // Stream the reply token-by-token into a single history entry.
+      const ps1 = getPromptSnapshot();
+      const id = appendEntry(
+        command,
+        '<span style="color:#627e99">thinking…</span>',
+        ps1,
+      );
+      setCommand('');
+      await streamAgent(command, (html) => updateEntry(id, html));
+      return;
     }
     setCommand('');
     return;
