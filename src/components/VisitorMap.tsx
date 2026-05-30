@@ -102,14 +102,19 @@ export const VisitorMap: React.FC = () => {
     ctx.translate(ox, oy);
     ctx.scale(scale, scale);
 
-    // land pixels (base map fills the canvas at scale 1)
+    // land as spaced square tiles (dot-matrix look). Base map fills the
+    // canvas at scale 1.
     const cw = cssW / GRID_W;
     const ch = cssH / GRID_H;
+    const tw = cw * 0.7; // ~30% gap between tiles
+    const th = ch * 0.7;
+    const tox = (cw - tw) / 2;
+    const toy = (ch - th) / 2;
     ctx.fillStyle = LAND;
     for (let gy = 0; gy < GRID_H; gy++) {
       for (let gx = 0; gx < GRID_W; gx++) {
         if (land.current[gy * GRID_W + gx]) {
-          ctx.fillRect(gx * cw, gy * ch, Math.ceil(cw), Math.ceil(ch));
+          ctx.fillRect(gx * cw + tox, gy * ch + toy, tw, th);
         }
       }
     }
