@@ -7,20 +7,118 @@ import {
   SAMPLE_POINTS,
   VisitPoint,
 } from '../utils/worldMap';
+import { ActivityChart } from './ActivityChart';
 
 export { MAP_TOKEN } from '../utils/mapToken';
 
-const OCEAN = '#0b1c2c';
-const LAND = '#33485f';
-const DOT = '#bf568b';
-const DOT_GLOW = 'rgba(191, 86, 139, 0.30)';
-const RING = '#8bbf56';
-const TEXT = '#cbd6e2';
-const MUTED = '#627e99';
-const ACCENT = '#568bbf';
+type RGB = [number, number, number];
+type Palette = {
+  ocean: string;
+  border: string;
+  landBase: RGB; // tile color with no visits
+  landHot: RGB; // tile color at peak density (whiter in dark, darker in light)
+  dot: string;
+  dotGlow: string;
+  ring: string;
+  text: string;
+  muted: string;
+  accent: string;
+};
+
+const paletteFor = (dark: boolean): Palette =>
+  dark
+    ? {
+        ocean: '#0b1c2c',
+        border: '#8bbf56',
+        landBase: [43, 61, 79],
+        landHot: [234, 241, 248],
+        dot: '#bf568b',
+        dotGlow: 'rgba(191,86,139,0.30)',
+        ring: '#8bbf56',
+        text: '#cbd6e2',
+        muted: '#627e99',
+        accent: '#568bbf',
+      }
+    : {
+        ocean: '#eef3f7',
+        border: '#9bbf6b',
+        landBase: [176, 190, 203],
+        landHot: [18, 30, 41],
+        dot: '#c2477f',
+        dotGlow: 'rgba(194,71,127,0.22)',
+        ring: '#5a9e2f',
+        text: '#1c2b3a',
+        muted: '#6b7b8a',
+        accent: '#2f6da8',
+      };
+
+const mix = (a: RGB, b: RGB, t: number): string =>
+  `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(
+    a[1] + (b[1] - a[1]) * t,
+  )},${Math.round(a[2] + (b[2] - a[2]) * t)})`;
 
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v));
+
+// Per-tile visit density (0..1), as a smooth falloff around each visit point.
+const SIGMA = 9; // degrees
+const computeHeat = (land: boolean[], points: VisitPoint[]): Float32Array => {
+  const h = new Float32Array(GRID_W * GRID_H);
+  if (points.length === 0) return h;
+  for (let gy = 0; gy < GRID_H; gy++) {
+    const lat = 90 - ((gy + 0.5) / GRID_H) * 180;
+    const cosLat = Math.cos((lat * Math.PI) / 180);
+    for (let gx = 0; gx < GRID_W; gx++) {
+      const idx = gy * GRID_W + gx;
+      if (!land[idx]) continue;
+      const lng = ((gx + 0.5) / GRID_W) * 360 - 180;
+      let s = 0;
+      for (let k = 0; k < points.length; k++) {
+        const p = points[k];
+        let dLng = ((p.lng - lng + 540) % 360) - 180;
+        dLng *= cosLat;
+        const dLat = p.lat - lat;
+        const d2 = dLng * dLng + dLat * dLat;
+        s += p.count / (1 + d2 / (SIGMA * SIGMA));
+      }
+      h[idx] = s;
+    }
+  }
+  let mx = 0;
+  for (let i = 0; i < h.length; i++) if (h[i] > mx) mx = h[i];
+  if (mx > 0) for (let i = 0; i < h.length; i++) h[i] = Math.pow(h[i] / mx, 0.6);
+  return h;
+};
+
+const useDark = (): boolean => {
+  const get = () =>
+    typeof window !== 'undefined' &&
+    !!window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const [dark, setDark] = React.useState<boolean>(get);
+  React.useEffect(() => {
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const on = (e: MediaQueryListEvent) => setDark(e.matches);
+    mq.addEventListener?.('change', on);
+    return () => mq.removeEventListener?.('change', on);
+  }, []);
+  return dark;
+};
+
+// Synthetic 90-day series for demo mode (no backend yet).
+const demoDaily = (): Record<string, number> => {
+  const out: Record<string, number> = {};
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const base = 5 + 3 * Math.sin(i / 6) + 2 * Math.sin(i / 23);
+    out[key] = Math.max(0, Math.round(base + (Math.random() * 4 - 1.5)));
+  }
+  return out;
+};
 
 type Status = 'loading' | 'live' | 'demo' | 'empty';
 type Hover = { p: VisitPoint; sx: number; sy: number };
@@ -34,12 +132,17 @@ export const VisitorMap: React.FC = () => {
     null,
   );
 
+  const dark = useDark();
+  const P = paletteFor(dark);
+
   const [points, setPoints] = React.useState<VisitPoint[]>([]);
   const [total, setTotal] = React.useState(0);
   const [status, setStatus] = React.useState<Status>('loading');
   const [hover, setHover] = React.useState<Hover | null>(null);
+  const [daily, setDaily] = React.useState<Record<string, number>>({});
 
   if (land.current.length === 0) land.current = buildLandGrid();
+  const heat = React.useMemo(() => computeHeat(land.current, points), [points]);
 
   const load = React.useCallback(() => {
     fetch('/api/visit')
@@ -48,20 +151,24 @@ export const VisitorMap: React.FC = () => {
         if (d.configured && Array.isArray(d.points) && d.points.length > 0) {
           setPoints(d.points);
           setTotal(d.total ?? 0);
+          setDaily(d.daily || {});
           setStatus('live');
         } else if (d.configured) {
           setPoints([]);
           setTotal(0);
+          setDaily(d.daily || {});
           setStatus('empty');
         } else {
           setPoints(SAMPLE_POINTS);
           setTotal(SAMPLE_POINTS.reduce((s, p) => s + p.count, 0));
+          setDaily(demoDaily());
           setStatus('demo');
         }
       })
       .catch(() => {
         setPoints(SAMPLE_POINTS);
         setTotal(SAMPLE_POINTS.reduce((s, p) => s + p.count, 0));
+        setDaily(demoDaily());
         setStatus('demo');
       });
   }, []);
@@ -95,53 +202,46 @@ export const VisitorMap: React.FC = () => {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = OCEAN;
+    ctx.fillStyle = P.ocean;
     ctx.fillRect(0, 0, cssW, cssH);
 
     ctx.save();
     ctx.translate(ox, oy);
     ctx.scale(scale, scale);
 
-    // land as spaced square tiles (dot-matrix look). Base map fills the
-    // canvas at scale 1.
+    // heat-tinted land tiles
     const cw = cssW / GRID_W;
     const ch = cssH / GRID_H;
-    const tw = cw * 0.7; // ~30% gap between tiles
+    const tw = cw * 0.7;
     const th = ch * 0.7;
     const tox = (cw - tw) / 2;
     const toy = (ch - th) / 2;
-    ctx.fillStyle = LAND;
     for (let gy = 0; gy < GRID_H; gy++) {
       for (let gx = 0; gx < GRID_W; gx++) {
-        if (land.current[gy * GRID_W + gx]) {
-          ctx.fillRect(gx * cw + tox, gy * ch + toy, tw, th);
-        }
+        const idx = gy * GRID_W + gx;
+        if (!land.current[idx]) continue;
+        ctx.fillStyle = mix(P.landBase, P.landHot, heat[idx]);
+        ctx.fillRect(gx * cw + tox, gy * ch + toy, tw, th);
       }
     }
 
-    // visitor dots
-    points.forEach((p) => {
-      const { x, y } = project(p.lng, p.lat, cssW, cssH);
-      const r = clamp(2 + Math.log2(p.count + 1), 2.5, 8) / scale;
-      ctx.fillStyle = DOT_GLOW;
-      ctx.beginPath();
-      ctx.arc(x, y, r * 2.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = DOT;
+    // No persistent dots — the heat shows density. Mark only the hovered spot.
+    if (hover) {
+      const { x, y } = project(hover.p.lng, hover.p.lat, cssW, cssH);
+      const r = 3.5 / scale;
+      ctx.fillStyle = P.dot;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
-      if (hover && hover.p === p) {
-        ctx.strokeStyle = RING;
-        ctx.lineWidth = 1.5 / scale;
-        ctx.beginPath();
-        ctx.arc(x, y, r * 2.6, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    });
+      ctx.strokeStyle = P.ring;
+      ctx.lineWidth = 1.5 / scale;
+      ctx.beginPath();
+      ctx.arc(x, y, r * 2.4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     ctx.restore();
-  }, [points, hover, clampView]);
+  }, [points, hover, heat, clampView, P]);
 
   React.useEffect(() => {
     draw();
@@ -153,7 +253,6 @@ export const VisitorMap: React.FC = () => {
     return () => window.removeEventListener('resize', onResize);
   }, [draw]);
 
-  // wheel zoom (native listener so we can preventDefault)
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -215,10 +314,7 @@ export const VisitorMap: React.FC = () => {
       draw();
       if (hover) setHover(null);
     } else {
-      const hit = hitTest(mx, my);
-      // avoid needless re-renders
-      if ((hit?.p ?? null) !== (hover?.p ?? null)) setHover(hit);
-      else if (hit) setHover(hit);
+      setHover(hitTest(mx, my));
     }
   };
 
@@ -233,7 +329,6 @@ export const VisitorMap: React.FC = () => {
     const cssH = canvas.clientHeight;
     const v = view.current;
     const ns = clamp(v.scale * factor, 1, 12);
-    // zoom about center
     v.ox = cssW / 2 - ((cssW / 2 - v.ox) / v.scale) * ns;
     v.oy = cssH / 2 - ((cssH / 2 - v.oy) / v.scale) * ns;
     v.scale = ns;
@@ -252,15 +347,15 @@ export const VisitorMap: React.FC = () => {
       : status === 'demo'
       ? 'demo data (set up Vercel KV to track real visits)'
       : status === 'empty'
-      ? 'no visits recorded yet'
+      ? 'no visits in the last 12 months'
       : `${total} visit${total === 1 ? '' : 's'} from ${points.length} place${
           points.length === 1 ? '' : 's'
         }`;
 
   const btn: React.CSSProperties = {
     background: 'transparent',
-    color: ACCENT,
-    border: `1px solid ${MUTED}`,
+    color: P.accent,
+    border: `1px solid ${P.muted}`,
     borderRadius: 4,
     padding: '1px 8px',
     cursor: 'pointer',
@@ -269,7 +364,7 @@ export const VisitorMap: React.FC = () => {
   };
 
   return (
-    <div style={{ margin: '4px 0 12px', maxWidth: 860 }}>
+    <div style={{ margin: '4px 0 12px', maxWidth: 860, color: P.text }}>
       <div
         style={{
           display: 'flex',
@@ -277,11 +372,12 @@ export const VisitorMap: React.FC = () => {
           gap: 8,
           flexWrap: 'wrap',
           marginBottom: 6,
-          color: MUTED,
+          color: P.muted,
           fontSize: '0.9em',
         }}
       >
-        <span style={{ color: TEXT }}>visitor map</span>
+        <span style={{ color: P.text }}>visitor map</span>
+        <span style={{ color: P.accent }}>· last 12 months</span>
         <span>— {statusLabel}</span>
         <span style={{ flexGrow: 1 }} />
         <button style={btn} onClick={() => zoomBy(1.4)} aria-label="zoom in">
@@ -305,8 +401,8 @@ export const VisitorMap: React.FC = () => {
             width: '100%',
             aspectRatio: '2 / 1',
             display: 'block',
-            background: OCEAN,
-            border: '1px solid #8bbf56',
+            background: P.ocean,
+            border: `1px solid ${P.border}`,
             borderRadius: 4,
             cursor: drag.current ? 'grabbing' : 'grab',
             imageRendering: 'pixelated',
@@ -326,17 +422,17 @@ export const VisitorMap: React.FC = () => {
               position: 'absolute',
               left: clamp(hover.sx + 10, 0, 720),
               top: clamp(hover.sy + 10, 0, 9999),
-              background: '#0b1c2cf0',
-              border: `1px solid ${ACCENT}`,
+              background: dark ? 'rgba(11,28,44,0.94)' : 'rgba(255,255,255,0.94)',
+              border: `1px solid ${P.accent}`,
               borderRadius: 4,
               padding: '2px 7px',
-              color: TEXT,
+              color: P.text,
               fontSize: '0.85em',
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
             }}
           >
-            <span style={{ color: ACCENT }}>
+            <span style={{ color: P.accent }}>
               {hover.p.city}, {hover.p.country}
             </span>{' '}
             · {hover.p.count} visit{hover.p.count === 1 ? '' : 's'}
@@ -344,10 +440,35 @@ export const VisitorMap: React.FC = () => {
         )}
       </div>
 
-      <div style={{ color: MUTED, fontSize: '0.8em', marginTop: 4 }}>
-        scroll/▢ to zoom · drag to pan · hover a dot for details · coarse
-        location only, no IPs stored
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          color: P.muted,
+          fontSize: '0.8em',
+          marginTop: 4,
+        }}
+      >
+        <span>fewer</span>
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+          <span
+            key={f}
+            style={{
+              display: 'inline-block',
+              width: 12,
+              height: 12,
+              background: mix(P.landBase, P.landHot, f),
+              borderRadius: 2,
+            }}
+          />
+        ))}
+        <span>more visits · last 12 months</span>
+        <span style={{ flexGrow: 1 }} />
+        <span>hover a hotspot for details · coarse location only, no IPs</span>
       </div>
+
+      <ActivityChart daily={daily} dark={dark} />
     </div>
   );
 };
