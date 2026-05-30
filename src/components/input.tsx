@@ -3,7 +3,8 @@ import { commandExists } from '../utils/commandExists';
 import { shell } from '../utils/shell';
 import { handleTabCompletion } from '../utils/tabCompletion';
 import { Ps1 } from './Ps1';
-import { cwdString } from '../utils/vfs';
+import { promptPath } from '../utils/vfs';
+import { isAgentActive } from '../utils/agentSession';
 
 export const Input = ({
   inputRef,
@@ -82,7 +83,7 @@ export const Input = ({
   return (
     <div className="flex flex-row space-x-2">
       <label htmlFor="prompt" className="flex-shrink">
-        <Ps1 path={cwdString()} />
+        <Ps1 path={promptPath()} />
       </label>
 
       <input
@@ -90,7 +91,7 @@ export const Input = ({
         id="prompt"
         type="text"
         className={`bg-light-background dark:bg-dark-background focus:outline-none flex-grow ${
-          commandExists(command) || command === ''
+          commandExists(command) || command === '' || isAgentActive()
             ? 'text-dark-green'
             : 'text-dark-red'
         }`}

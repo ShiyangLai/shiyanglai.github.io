@@ -1,6 +1,7 @@
 import React from 'react';
 import * as bin from './bin';
 import { snapshotPrompt } from './vfs';
+import { isAgentActive, handleAgentInput, exitAgent } from './agentSession';
 
 export const shell = async (
   command: string,
@@ -11,6 +12,26 @@ export const shell = async (
   // Capture the prompt's directory BEFORE running the command, so the history
   // line shows where the command was typed (a `cd` only affects later lines).
   snapshotPrompt();
+
+  // In agent mode, input is a chat message (not a command) until `exit`.
+  if (isAgentActive()) {
+    const msg = command.trim();
+    const lower = msg.toLowerCase();
+    if (msg === '') {
+      setHistory('');
+    } else if (lower === 'clear') {
+      clearHistory();
+    } else if (lower === 'exit' || lower === 'quit') {
+      exitAgent();
+      setHistory("Left agent mode. Type 'help' for commands.");
+    } else {
+      const reply = await handleAgentInput(command);
+      setHistory(reply);
+    }
+    setCommand('');
+    return;
+  }
+
   const args = command.split(' ');
   args[0] = args[0].toLowerCase();
 
