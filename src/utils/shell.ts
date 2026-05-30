@@ -1,11 +1,12 @@
 import React from 'react';
 import * as bin from './bin';
-import { snapshotPrompt, getPromptSnapshot } from './vfs';
+import { snapshotPrompt } from './vfs';
 import {
   isAgentActive,
   streamAgent,
   exitAgent,
   resetAgent,
+  AGENT_TURN,
 } from './agentSession';
 
 export const shell = async (
@@ -35,12 +36,11 @@ export const shell = async (
       resetAgent();
       setHistory('(conversation cleared — starting fresh)');
     } else {
-      // Stream the reply token-by-token into a single history entry.
-      const ps1 = getPromptSnapshot();
+      // Stream the reply into a chat-styled turn (you › … / shiyang-ai › …).
       const id = appendEntry(
         command,
         '<span style="color:#627e99">thinking…</span>',
-        ps1,
+        AGENT_TURN,
       );
       setCommand('');
       await streamAgent(command, (html) => updateEntry(id, html));
