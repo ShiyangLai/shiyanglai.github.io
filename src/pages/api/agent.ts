@@ -1,7 +1,11 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import siteConfig from '../../../config.json';
 
-// Edge runtime so we can stream OpenAI tokens straight to the browser.
-export const config = { runtime: 'experimental-edge' };
+// "Digital double" chat endpoint (Node serverless). Streams OpenAI tokens to the
+// client via res.write; if the platform buffers, it degrades gracefully to a
+// single delivery. Key stays server-side; persona comes from a GitHub-hosted
+// persona.md. Cost/abuse controls: per-IP daily cap, global daily cap, and a
+// hard USD budget kill-switch driven by real token spend (all KV-backed).
 
 const REST_URL =
   process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -10,7 +14,6 @@ const REST_TOKEN =
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const MODEL = process.env.OPENAI_AGENT_MODEL || 'gpt-4o-mini';
 
-// --- cost / abuse knobs (override via env) ---------------------------------
 const PER_IP_DAILY = 10;
 const GLOBAL_DAILY = 500;
 const MAX_TOKENS = 400;
@@ -69,9 +72,10 @@ async function kv(commands: Cmd[]): Promise<Array<{ result: unknown }> | null> {
   }
 }
 
-function clientIp(req: Request): string {
-  const fwd = req.headers.get('x-forwarded-for') || '';
-  return fwd.split(',')[0].trim() || 'unknown';
+function clientIp(req: NextApiRequest): string {
+  const fwd = req.headers['x-forwarded-for'];
+  const raw = Array.isArray(fwd) ? fwd[0] : fwd || '';
+  return raw.split(',')[0].trim() || 'unknown';
 }
 
 async function overBudget(): Promise<boolean> {
@@ -86,7 +90,7 @@ async function addSpend(promptTokens: number, completionTokens: number) {
   if (cost > 0) await kv([['INCRBYFLOAT', 'agent:spend', cost]]);
 }
 
-async function rateLimited(req: Request): Promise<string | null> {
+async function rateLimited(req: NextApiRequest): Promise<string | null> {
   const day = new Date().toISOString().slice(0, 10);
   const ipKey = `agent:rl:${clientIp(req)}:${day}`;
   const globalKey = `agent:rl:global:${day}`;
@@ -110,37 +114,30 @@ async function rateLimited(req: Request): Promise<string | null> {
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
-const json = (obj: unknown): Response =>
-  new Response(JSON.stringify(obj), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-  });
-
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return res.status(405).json({ reply: 'Method not allowed.' });
   }
   if (!OPENAI_KEY) {
-    return json({
+    return res.status(200).json({
       reply:
         "The agent isn't switched on yet — the site owner needs to set OPENAI_API_KEY on the server.",
       system: true,
     });
   }
-
-  // Budget kill-switch takes precedence over everything.
-  if (await overBudget()) return json({ reply: BUDGET_MESSAGE, system: true });
-
-  const limit = await rateLimited(req);
-  if (limit) return json({ reply: limit, system: true });
-
-  let body: { messages?: Msg[] } = {};
-  try {
-    body = await req.json();
-  } catch (e) {
-    body = {};
+  if (await overBudget()) {
+    return res.status(200).json({ reply: BUDGET_MESSAGE, system: true });
   }
-  const incoming: Msg[] = Array.isArray(body?.messages) ? body.messages : [];
+  const limit = await rateLimited(req);
+  if (limit) return res.status(200).json({ reply: limit, system: true });
+
+  const incoming: Msg[] = Array.isArray(req.body?.messages)
+    ? req.body.messages
+    : [];
   const history = incoming
     .filter(
       (m) =>
@@ -151,7 +148,7 @@ export default async function handler(req: Request): Promise<Response> {
     .slice(-10)
     .map((m) => ({ role: m.role, content: String(m.content).slice(0, 1500) }));
   if (history.length === 0) {
-    return json({ reply: 'Say something to get started.', system: true });
+    return res.status(200).json({ reply: 'Say something to get started.', system: true });
   }
 
   const persona = await getPersona();
@@ -171,59 +168,57 @@ export default async function handler(req: Request): Promise<Response> {
     }),
   });
   if (!aiRes.ok || !aiRes.body) {
-    return json({
+    return res.status(200).json({
       reply:
         'The agent had trouble responding just now. Please try again in a moment.',
       system: true,
     });
   }
 
-  // Transform OpenAI's SSE stream into a plain-text token stream for the client,
-  // capturing token usage from the final chunk to bill against the budget.
-  const reader = aiRes.body.getReader();
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      let buffer = '';
-      let usage: { prompt_tokens?: number; completion_tokens?: number } | null =
-        null;
-      try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-          for (const line of lines) {
-            const t = line.trim();
-            if (!t.startsWith('data:')) continue;
-            const payload = t.slice(5).trim();
-            if (payload === '[DONE]') continue;
-            try {
-              const j = JSON.parse(payload);
-              const delta = j.choices?.[0]?.delta?.content;
-              if (delta) controller.enqueue(encoder.encode(delta));
-              if (j.usage) usage = j.usage;
-            } catch (e) {
-              // ignore non-JSON keep-alive lines
-            }
-          }
-        }
-      } catch (e) {
-        // stream interrupted — close gracefully
-      }
-      if (usage) {
-        await addSpend(
-          Number(usage.prompt_tokens || 0),
-          Number(usage.completion_tokens || 0),
-        );
-      }
-      controller.close();
-    },
-  });
+  // Stream tokens to the client as plain text (degrades to one delivery if
+  // the platform buffers).
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.status(200);
+  const anyRes = res as unknown as { flushHeaders?: () => void };
+  if (typeof anyRes.flushHeaders === 'function') anyRes.flushHeaders();
 
-  return new Response(stream, {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
-  });
+  const reader = (
+    aiRes.body as unknown as ReadableStream<Uint8Array>
+  ).getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let usage: { prompt_tokens?: number; completion_tokens?: number } | null =
+    null;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        const t = line.trim();
+        if (!t.startsWith('data:')) continue;
+        const payload = t.slice(5).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const j = JSON.parse(payload);
+          const delta = j.choices?.[0]?.delta?.content;
+          if (delta) res.write(delta);
+          if (j.usage) usage = j.usage;
+        } catch (e) {
+          // ignore keep-alive / non-JSON lines
+        }
+      }
+    }
+  } catch (e) {
+    // stream interrupted — end gracefully
+  }
+  if (usage) {
+    await addSpend(
+      Number(usage.prompt_tokens || 0),
+      Number(usage.completion_tokens || 0),
+    );
+  }
+  res.end();
 }
