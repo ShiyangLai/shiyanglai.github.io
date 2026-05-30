@@ -1,5 +1,5 @@
 {
-  "readmeUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/master/src/pages/readme.txt",
+  "readmeUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/src/pages/readme.txt",
   "title": "Shiyang's Terminal",
   "name": "shiyang (lucas) lai",
   "ascii": "shiyang",
@@ -14,6 +14,7 @@
   "repo": "https://github.com/ShiyangLai",
   "google_scholar": "https://scholar.google.com/citations?user=qALDmfcAAAAJ&hl=en",
   "resume_url": "https://drive.google.com/file/d/1v9cBCfEIwetz97SozKCvdKUfPkFkKAjq/view?usp=sharing",
+  "newsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/news.md",
   "colors": {
     "dark": {
       "background":"#0B1C2C",
