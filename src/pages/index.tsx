@@ -28,6 +28,19 @@ const IndexPage: React.FC<IndexPageProps> = ({ inputRef }) => {
     init();
   }, [init]);
 
+  // Record this visit once per session (powers the `map` command). Coarse
+  // location only — handled server-side via Vercel geo headers; no IPs stored.
+  React.useEffect(() => {
+    try {
+      if (!window.sessionStorage.getItem('visit-recorded')) {
+        window.sessionStorage.setItem('visit-recorded', '1');
+        fetch('/api/visit', { method: 'POST' }).catch(() => undefined);
+      }
+    } catch (e) {
+      // no-op (storage unavailable, e.g. private mode)
+    }
+  }, []);
+
   React.useEffect(() => {
     if (inputRef.current) {
       inputRef.current.scrollIntoView();

@@ -21,6 +21,7 @@ export const help = async (args: string[]): Promise<string> => {
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
 Type 'ls', then 'cd' into a folder, to explore my projects.
+Type 'map' to see where visitors are from.
 Type 'repo' to visit my GitHub homepage.
 `;
 };
@@ -147,6 +148,7 @@ Type 'help' to see the list of available commands.
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
 Type 'ls', then 'cd' into a folder, to explore my projects.
+Type 'map' to see where visitors are from.
 Type 'repo' or click <u><a class="text-light-blue dark:text-dark-blue underline" href="${config.repo}" target="_blank">here</a></u> for my GitHub homepage.
 `;
 };
