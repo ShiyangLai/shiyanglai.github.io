@@ -15,6 +15,7 @@
 import axios from 'axios';
 import config from '../../config.json';
 import { TAG, renderMarkup, link } from './format';
+import { isAgentActive } from './agentSession';
 
 type Proj = {
   id: string;
@@ -99,8 +100,12 @@ const dir = (name: string): string => `<b style="color:${TAG}">${name}/</b>`;
 export const cwdString = (): string =>
   '~' + (cwd.length ? '/' + cwd.join('/') : '');
 
+// Prompt label: the chat indicator when the agent is active, else the cwd.
+export const promptPath = (): string =>
+  isAgentActive() ? 'chat' : cwdString();
+
 export const snapshotPrompt = (): void => {
-  promptSnapshotValue = cwdString();
+  promptSnapshotValue = promptPath();
 };
 
 export const getPromptSnapshot = (): string => promptSnapshotValue;
