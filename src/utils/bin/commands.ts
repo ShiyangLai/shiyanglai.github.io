@@ -20,6 +20,7 @@ export const help = async (args: string[]): Promise<string> => {
 [ctrl+l]/clear: clear terminal.\n
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
+Type 'ls' to browse my projects.
 Type 'repo' to visit my GitHub homepage.
 `;
 };
@@ -102,14 +103,6 @@ export const whoami = async (args: string[]): Promise<string> => {
   return `${config.ps1_username}`;
 };
 
-export const ls = async (args: string[]): Promise<string> => {
-  return `a
-bunch
-of
-fake
-directories`;
-};
-
 export const cd = async (args: string[]): Promise<string> => {
   return `unfortunately, i cannot afford more directories.
 the website development is still in progress...`;
@@ -158,6 +151,7 @@ export const banner = (args?: string[]): string => {
 Type 'help' to see the list of available commands.
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
+Type 'ls' to browse my projects.
 Type 'repo' or click <u><a class="text-light-blue dark:text-dark-blue underline" href="${config.repo}" target="_blank">here</a></u> for my GitHub homepage.
 `;
 };
