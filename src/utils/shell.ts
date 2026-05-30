@@ -1,5 +1,6 @@
 import React from 'react';
 import * as bin from './bin';
+import { snapshotPrompt } from './vfs';
 
 export const shell = async (
   command: string,
@@ -7,6 +8,9 @@ export const shell = async (
   clearHistory: () => void,
   setCommand: React.Dispatch<React.SetStateAction<string>>,
 ) => {
+  // Capture the prompt's directory BEFORE running the command, so the history
+  // line shows where the command was typed (a `cd` only affects later lines).
+  snapshotPrompt();
   const args = command.split(' ');
   args[0] = args[0].toLowerCase();
 

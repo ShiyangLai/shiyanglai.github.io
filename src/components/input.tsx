@@ -3,6 +3,7 @@ import { commandExists } from '../utils/commandExists';
 import { shell } from '../utils/shell';
 import { handleTabCompletion } from '../utils/tabCompletion';
 import { Ps1 } from './Ps1';
+import { cwdString } from '../utils/vfs';
 
 export const Input = ({
   inputRef,
@@ -81,7 +82,7 @@ export const Input = ({
   return (
     <div className="flex flex-row space-x-2">
       <label htmlFor="prompt" className="flex-shrink">
-        <Ps1 />
+        <Ps1 path={cwdString()} />
       </label>
 
       <input

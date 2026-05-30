@@ -4,16 +4,10 @@ import { getQuote } from '../api';
 import { getReadme } from '../api';
 import { getWeather } from '../api';
 import { getNews } from '../api';
-import { getProjects } from '../api';
 
 // Recent achievements / news (sourced from a GitHub file via config.newsUrl)
 export const news = async (args: string[]): Promise<string> => {
   return await getNews();
-};
-
-// Projects, grouped into ongoing / finished (sourced from config.projectsUrl)
-export const ls = async (args: string[]): Promise<string> => {
-  return await getProjects();
 };
 
 export const quote = async (args: string[]): Promise<string> => {

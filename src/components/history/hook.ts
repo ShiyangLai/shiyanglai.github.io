@@ -1,5 +1,6 @@
 import React from 'react';
 import { History } from './interface';
+import { getPromptSnapshot } from '../../utils/vfs';
 
 export const useHistory = (defaultValue: Array<History>) => {
   const [history, setHistory] = React.useState<Array<History>>(defaultValue);
@@ -18,6 +19,7 @@ export const useHistory = (defaultValue: Array<History>) => {
           date: new Date(),
           command,
           output: value,
+          ps1: getPromptSnapshot(),
         },
       ]),
     setCommand,
