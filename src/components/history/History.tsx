@@ -2,6 +2,8 @@ import React from 'react';
 import { History as HistoryInterface } from './interface';
 import { Ps1 } from '../Ps1';
 import { VisitorMap, MAP_TOKEN } from '../VisitorMap';
+import { Guestbook } from '../Guestbook';
+import { GUESTBOOK_TOKEN } from '../../utils/mapToken';
 import { AGENT_TURN } from '../../utils/agentSession';
 
 export const History: React.FC<{ history: Array<HistoryInterface> }> = ({
@@ -30,6 +32,8 @@ export const History: React.FC<{ history: Array<HistoryInterface> }> = ({
 
           {entry.output === MAP_TOKEN ? (
             <VisitorMap />
+          ) : entry.output === GUESTBOOK_TOKEN ? (
+            <Guestbook />
           ) : (
             <p
               className="whitespace-pre-wrap mb-2"

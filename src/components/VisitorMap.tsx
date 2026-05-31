@@ -8,6 +8,7 @@ import {
   VisitPoint,
 } from '../utils/worldMap';
 import { ActivityChart } from './ActivityChart';
+import { Guestbook } from './Guestbook';
 
 export { MAP_TOKEN } from '../utils/mapToken';
 
@@ -469,6 +470,15 @@ export const VisitorMap: React.FC = () => {
       </div>
 
       <ActivityChart daily={daily} dark={dark} />
+
+      <div
+        style={{
+          borderTop: `1px solid ${P.muted}`,
+          opacity: 0.5,
+          margin: '12px 0',
+        }}
+      />
+      <Guestbook dark={dark} />
     </div>
   );
 };

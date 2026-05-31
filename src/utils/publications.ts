@@ -160,8 +160,19 @@ const venueOf = (p: Pub): string => {
 const linkLabel = (url: string): string =>
   /arxiv/i.test(url) ? 'arXiv' : /openreview/i.test(url) ? 'OpenReview' : 'link';
 
+// Co-first / equal-contribution authors (a custom `cofirst` bib field), as a
+// lower-cased set of "First Last" names. Shown with a `*`; absent from `cite`.
+const cofirstSet = (p: Pub): Set<string> =>
+  new Set(
+    clean(p.fields.cofirst || '')
+      .split(/\s+and\s+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+  );
+
 // "Last, First and Foo, Bar and others" -> highlighted "First Last, Bar Foo, et al."
-const authorsHtml = (raw: string): string =>
+// Names in `cofirst` get a trailing `*`; the owner's name is highlighted.
+const authorsHtml = (raw: string, cofirst: Set<string>): string =>
   clean(raw)
     .split(/\s+and\s+/)
     .map((a) => a.trim())
@@ -173,9 +184,14 @@ const authorsHtml = (raw: string): string =>
         const [last, ...rest] = a.split(',');
         name = `${rest.join(',').trim()} ${last.trim()}`.trim();
       }
-      return name.toLowerCase() === SELF
-        ? `<b style="color:${HL}">${esc(name)}</b>`
-        : esc(name);
+      const star = cofirst.has(name.toLowerCase())
+        ? `<sup style="color:${TAG}">*</sup>`
+        : '';
+      const html =
+        name.toLowerCase() === SELF
+          ? `<b style="color:${HL}">${esc(name)}</b>`
+          : esc(name);
+      return html + star;
     })
     .join(', ');
 
@@ -193,11 +209,15 @@ export const getPublications = async (): Promise<string> => {
       `<span style="color:${TAG}">[${esc(p.key)}]</span> <b>${esc(
         clean(p.fields.title),
       )}</b>\n` +
-      `   <span style="color:${MUTED}">${authorsHtml(p.fields.author || '')}${
-        vy ? ` — ${esc(vy)}` : ''
-      }</span>${linkHtml}`
+      `   <span style="color:${MUTED}">${authorsHtml(
+        p.fields.author || '',
+        cofirstSet(p),
+      )}${vy ? ` — ${esc(vy)}` : ''}</span>${linkHtml}`
     );
   });
+  const legend = sel.some((p) => p.fields.cofirst)
+    ? `\n\n<span style="color:${MUTED}"><sup style="color:${TAG}">*</sup> equal contribution (co-first author)</span>`
+    : '';
   const scholar = config.google_scholar
     ? `\n\nOlder work is still here — '<b>cite &lt;id&gt;</b>' it, or see the ${link(
         'full list on Google Scholar',
@@ -206,7 +226,7 @@ export const getPublications = async (): Promise<string> => {
     : '';
   return `<b style="color:${TAG}">Selected publications</b>  (type '<b>cite &lt;id&gt;</b>' for BibTeX)\n\n${items.join(
     '\n\n',
-  )}${scholar}\n`;
+  )}${legend}${scholar}\n`;
 };
 
 export const getCitation = async (idArg?: string): Promise<string> => {
@@ -227,5 +247,8 @@ export const getCitation = async (idArg?: string): Promise<string> => {
       idArg,
     )}'. Type 'publications' to see the list (or 'cite' for all ids).`;
   }
-  return wanted.map((p) => esc(p.raw)).join('\n\n');
+  // Drop internal-only fields so the emitted BibTeX is clean & standard.
+  const stripInternal = (raw: string): string =>
+    raw.replace(/^[ \t]*cofirst[ \t]*=.*\r?\n/gim, '');
+  return wanted.map((p) => esc(stripInternal(p.raw))).join('\n\n');
 };
