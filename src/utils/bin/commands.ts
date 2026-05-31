@@ -2,6 +2,10 @@
 
 import * as bin from './index';
 import config from '../../../config.json';
+import { ORANGE } from '../format';
+
+// Orange call-to-action nudging visitors to try the AI double (rendered as HTML).
+const AGENT_CTA = `<span style="color:${ORANGE};font-weight:bold">&gt;&gt; Type 'agent' to chat with my AI double — go on, try it! &lt;&lt;</span>`;
 
 // Help
 export const help = async (args: string[]): Promise<string> => {
@@ -23,8 +27,9 @@ Type 'news' to see my recent achievements.
 Type 'publications' (and 'cite <id>') to see my papers.
 Type 'ls', then 'cd' into a folder, to explore my projects.
 Type 'map' to see where visitors are from.
-Type 'agent' to chat with my AI double.
+Type 'guestbook' to sign my guestbook.
 Type 'repo' to visit my GitHub homepage.
+${AGENT_CTA}
 `;
 };
 
@@ -152,7 +157,8 @@ Type 'news' to see my recent achievements.
 Type 'publications' (and 'cite <id>') to see my papers.
 Type 'ls', then 'cd' into a folder, to explore my projects.
 Type 'map' to see where visitors are from.
-Type 'agent' to chat with my AI double.
+Type 'guestbook' to sign my guestbook.
 Type 'repo' or click <u><a class="text-light-blue dark:text-dark-blue underline" href="${config.repo}" target="_blank">here</a></u> for my GitHub homepage.
+${AGENT_CTA}
 `;
 };

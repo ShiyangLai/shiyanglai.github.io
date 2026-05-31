@@ -5,6 +5,7 @@
 // `content` glob does not scan src/utils.
 export const HL = '#BF568B'; // magenta accent — for **highlights**
 export const TAG = '#568BBF'; // cyan accent — for dates / names / dirs / links
+export const ORANGE = '#E0913C'; // warm orange accent — for call-to-action (e.g. `agent`)
 
 const LINK_CLASS = 'text-light-blue dark:text-dark-blue underline';
 
