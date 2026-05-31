@@ -17,7 +17,7 @@
   "newsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/news.md",
   "projectsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/projects.md",
   "personaUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/persona.md",
-  "publicationsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/publications.md",
+  "publicationsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/publications.bib",
   "colors": {
     "dark": {
       "background":"#0B1C2C",
