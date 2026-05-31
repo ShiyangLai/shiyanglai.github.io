@@ -20,6 +20,7 @@ export const help = async (args: string[]): Promise<string> => {
 [ctrl+l]/clear: clear terminal.\n
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
+Type 'publications' (and 'cite <id>') to see my papers.
 Type 'ls', then 'cd' into a folder, to explore my projects.
 Type 'map' to see where visitors are from.
 Type 'agent' to chat with my AI double.
@@ -148,6 +149,7 @@ export const banner = (args?: string[]): string => {
 Type 'help' to see the list of available commands.
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
+Type 'publications' (and 'cite <id>') to see my papers.
 Type 'ls', then 'cd' into a folder, to explore my projects.
 Type 'map' to see where visitors are from.
 Type 'agent' to chat with my AI double.
