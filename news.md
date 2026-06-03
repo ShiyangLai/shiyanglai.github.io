@@ -13,8 +13,11 @@
 2026-05 | Our paper <i>Investigating the Link Between Representational Similarity and Model Interactions</i> was accepted to **ICML 2026**!
 2026-04 | I received a **$3,500** award from the Sociology Henderson Fund at UChicago.
 2026-04 | Our paper <i>Biased AI Enhances Human Decision-Making But Reduces Trust</i> was accepted to **IC2S2 2026** as a lightning talk — **top 3.7%**!
+2026-04 | Our paper <i>Probing Multimodal Large Language Models on Cognitive Biases in Chinese Short-Video Misinformation</i> was accepted to **ACL 2026** (Findings)!
 2026-02 | I received a **$1,000** award from the Sociology Henderson Fund at UChicago.
+2026-02 | I received a **$4,700** grant to support my research under the New Forms of Socio-Cognitive AI Initiative.
 2026-01 | Our paper <i>Signal in the Noise: Polysemantic Interference Transfers and Predicts Cross-Model Influence</i> was accepted to **ICLR 2026**!
+2026-01 | Our paper <i>Can Editing LLMs Inject Harm?</i> was accepted to **AAAI 2026**!
 
 
 
