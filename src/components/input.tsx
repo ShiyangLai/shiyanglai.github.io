@@ -4,7 +4,7 @@ import { shell } from '../utils/shell';
 import { handleTabCompletion } from '../utils/tabCompletion';
 import { Ps1 } from './Ps1';
 import { promptPath } from '../utils/vfs';
-import { isAgentActive } from '../utils/agentSession';
+import { isAgentActive, youLabel } from '../utils/agentSession';
 
 export const Input = ({
   inputRef,
@@ -94,7 +94,9 @@ export const Input = ({
       <label htmlFor="prompt" className="flex-shrink">
         {isAgentActive() ? (
           <div>
-            <span className="text-light-yellow dark:text-dark-yellow">you</span>
+            <span className="text-light-yellow dark:text-dark-yellow">
+              {youLabel()}
+            </span>
             <span className="text-light-gray dark:text-dark-gray"> › </span>
           </div>
         ) : (

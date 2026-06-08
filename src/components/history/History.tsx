@@ -4,7 +4,7 @@ import { Ps1 } from '../Ps1';
 import { VisitorMap, MAP_TOKEN } from '../VisitorMap';
 import { Guestbook } from '../Guestbook';
 import { GUESTBOOK_TOKEN } from '../../utils/mapToken';
-import { AGENT_TURN } from '../../utils/agentSession';
+import { AGENT_TURN, youLabel } from '../../utils/agentSession';
 
 export const History: React.FC<{ history: Array<HistoryInterface> }> = ({
   history,
@@ -18,7 +18,7 @@ export const History: React.FC<{ history: Array<HistoryInterface> }> = ({
               {entry.ps1 === AGENT_TURN ? (
                 <div>
                   <span className="text-light-yellow dark:text-dark-yellow">
-                    you
+                    {youLabel()}
                   </span>
                   <span className="text-light-gray dark:text-dark-gray"> › </span>
                 </div>
