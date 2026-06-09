@@ -6,14 +6,21 @@ import siteConfig from '../../../config.json';
 // single delivery. Key stays server-side; persona comes from a GitHub-hosted
 // persona.md. Cost/abuse controls: per-IP daily cap, global daily cap, and a
 // hard USD budget kill-switch driven by real token spend (all KV-backed).
+//
+// SECRET MODE: if the latest user message equals AGENT_SECRET_PHRASE, the client
+// is told to "unlock". Once unlocked it sends { secret:true, key:<phrase> } and
+// the endpoint switches to a separate API key, a stronger model, a vanilla
+// (default) persona, a separate $30 budget, and no per-IP cap. The interface
+// language is handled client-side; replies default to Chinese via the persona.
 
 const REST_URL =
   process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const REST_TOKEN =
   process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// --- public agent config ---
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const MODEL = process.env.OPENAI_AGENT_MODEL || 'gpt-4o-mini';
-
 const PER_IP_DAILY = 10;
 const GLOBAL_DAILY = 500;
 const MAX_TOKENS = 400;
@@ -21,11 +28,31 @@ const BUDGET_USD = parseFloat(process.env.AGENT_BUDGET_USD || '5');
 const PRICE_IN = parseFloat(process.env.AGENT_PRICE_IN_PER_1M || '0.15');
 const PRICE_OUT = parseFloat(process.env.AGENT_PRICE_OUT_PER_1M || '0.60');
 
+// --- secret-mode config (owner-only; gated by a passphrase) ---
+const SECRET_PHRASE = process.env.AGENT_SECRET_PHRASE || '';
+const SECRET_KEY =
+  process.env.OPENAI_API_KEY_SECRET || process.env.AGENT_SECRET_OPENAI_KEY || '';
+const SECRET_MODEL = process.env.AGENT_SECRET_MODEL || 'gpt-5.5';
+const SECRET_BUDGET_USD = parseFloat(process.env.AGENT_SECRET_BUDGET_USD || '30');
+const SECRET_MAX_TOKENS = parseInt(process.env.AGENT_SECRET_MAX_TOKENS || '1200', 10);
+// GPT-5.5 prices are unknown to this code — set these env vars to the real
+// per-1M-token prices. Defaults are deliberately high so the $30 kill-switch
+// trips conservatively (early) rather than overspending if left unset.
+const SECRET_PRICE_IN = parseFloat(process.env.AGENT_SECRET_PRICE_IN_PER_1M || '2.5');
+const SECRET_PRICE_OUT = parseFloat(process.env.AGENT_SECRET_PRICE_OUT_PER_1M || '20');
+const SECRET_PERSONA =
+  process.env.AGENT_SECRET_PERSONA ||
+  '你是一个聪明、严谨、乐于助人的 AI 助手。请默认用简体中文回答；如果用户使用其他语言，就用对应语言回答。回答要准确、清晰、有条理。';
+
 const CONTACT = siteConfig.email;
 const mailto = `<u><a href="mailto:${CONTACT}" style="color:#568bbf" target="_blank">${CONTACT}</a></u>`;
 const BUDGET_MESSAGE = `Ah — my agent just ran out of budget. Turns out running an AI clone of a broke PhD student isn't free...
 If you'd like to keep the conversation going, email the real me: ${mailto}
 And if you're hiring a research intern, I'm genuinely interested — please reach out! (Land me a well-paid gig and I promise to top up the budget so my digital twin can ramble on for hours.)`;
+
+// Shown (in Chinese) when the secret passphrase is accepted.
+const SECRET_WELCOME = `<b>已进入秘密模式。</b>现在由更强的模型驱动，使用独立的预算。问我任何问题吧 —— 输入 <b>exit</b>（或 <b>退出</b>）离开。`;
+const SECRET_BUDGET_MESSAGE = `秘密模式的预算已用完。请到 OpenAI 后台查看用量，或调整服务器上的 AGENT_SECRET_BUDGET_USD。`;
 
 const FALLBACK_PERSONA =
   'You are a friendly AI imitation of the owner of this website. You are not the real person. Answer questions about them concisely, never invent facts, and decline anything harmful.';
@@ -78,16 +105,22 @@ function clientIp(req: NextApiRequest): string {
   return raw.split(',')[0].trim() || 'unknown';
 }
 
-async function overBudget(): Promise<boolean> {
-  const res = await kv([['GET', 'agent:spend']]);
+async function overBudget(spendKey: string, limit: number): Promise<boolean> {
+  const res = await kv([['GET', spendKey]]);
   if (!res) return false;
   const spent = parseFloat(String(res[0]?.result ?? '0')) || 0;
-  return spent >= BUDGET_USD;
+  return spent >= limit;
 }
 
-async function addSpend(promptTokens: number, completionTokens: number) {
-  const cost = (promptTokens * PRICE_IN + completionTokens * PRICE_OUT) / 1e6;
-  if (cost > 0) await kv([['INCRBYFLOAT', 'agent:spend', cost]]);
+async function addSpend(
+  spendKey: string,
+  priceIn: number,
+  priceOut: number,
+  promptTokens: number,
+  completionTokens: number,
+) {
+  const cost = (promptTokens * priceIn + completionTokens * priceOut) / 1e6;
+  if (cost > 0) await kv([['INCRBYFLOAT', spendKey, cost]]);
 }
 
 async function rateLimited(req: NextApiRequest): Promise<string | null> {
@@ -122,22 +155,59 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ reply: 'Method not allowed.' });
   }
-  if (!OPENAI_KEY) {
-    return res.status(200).json({
-      reply:
-        "The agent isn't switched on yet — the site owner needs to set OPENAI_API_KEY on the server.",
-      system: true,
-    });
-  }
-  if (await overBudget()) {
-    return res.status(200).json({ reply: BUDGET_MESSAGE, system: true });
-  }
-  const limit = await rateLimited(req);
-  if (limit) return res.status(200).json({ reply: limit, system: true });
 
+  const wantsSecret = req.body?.secret === true;
+  const providedKey =
+    typeof req.body?.key === 'string' ? req.body.key : '';
   const incoming: Msg[] = Array.isArray(req.body?.messages)
     ? req.body.messages
     : [];
+
+  // Secret-mode unlock probe: if a NON-secret request's latest user message is
+  // exactly the passphrase, tell the client to unlock. Free — no model call,
+  // no rate-limit/budget impact. (Validated server-side; phrase never shipped.)
+  if (!wantsSecret && SECRET_PHRASE) {
+    const lastUser = [...incoming]
+      .reverse()
+      .find((m) => m && m.role === 'user' && typeof m.content === 'string');
+    if (lastUser && String(lastUser.content).trim() === SECRET_PHRASE) {
+      return res
+        .status(200)
+        .json({ unlocked: true, system: true, reply: SECRET_WELCOME });
+    }
+  }
+
+  const secret = wantsSecret && !!SECRET_PHRASE && providedKey === SECRET_PHRASE;
+
+  const apiKey = secret ? SECRET_KEY : OPENAI_KEY;
+  if (!apiKey) {
+    return res.status(200).json({
+      reply: secret
+        ? '秘密模式尚未配置：服务器需要设置 OPENAI_API_KEY_SECRET。'
+        : "The agent isn't switched on yet — the site owner needs to set OPENAI_API_KEY on the server.",
+      system: true,
+    });
+  }
+
+  const spendKey = secret ? 'agent:spend:secret' : 'agent:spend';
+  const budgetLimit = secret ? SECRET_BUDGET_USD : BUDGET_USD;
+  const priceIn = secret ? SECRET_PRICE_IN : PRICE_IN;
+  const priceOut = secret ? SECRET_PRICE_OUT : PRICE_OUT;
+  const model = secret ? SECRET_MODEL : MODEL;
+  const maxTokens = secret ? SECRET_MAX_TOKENS : MAX_TOKENS;
+
+  if (await overBudget(spendKey, budgetLimit)) {
+    return res
+      .status(200)
+      .json({ reply: secret ? SECRET_BUDGET_MESSAGE : BUDGET_MESSAGE, system: true });
+  }
+
+  // Public agent is rate-limited; secret mode (passphrase-authed owner) is not.
+  if (!secret) {
+    const limit = await rateLimited(req);
+    if (limit) return res.status(200).json({ reply: limit, system: true });
+  }
+
   const history = incoming
     .filter(
       (m) =>
@@ -148,29 +218,42 @@ export default async function handler(
     .slice(-10)
     .map((m) => ({ role: m.role, content: String(m.content).slice(0, 1500) }));
   if (history.length === 0) {
-    return res.status(200).json({ reply: 'Say something to get started.', system: true });
+    return res.status(200).json({
+      reply: secret ? '说点什么开始吧。' : 'Say something to get started.',
+      system: true,
+    });
   }
 
-  const persona = await getPersona();
+  const persona = secret ? SECRET_PERSONA : await getPersona();
+
+  // GPT-5-family models use max_completion_tokens and only the default
+  // temperature; the gpt-4o-mini public agent uses max_tokens + temperature.
+  const reqBody: Record<string, unknown> = {
+    model,
+    messages: [{ role: 'system', content: persona }, ...history],
+    stream: true,
+    stream_options: { include_usage: true },
+  };
+  if (secret) {
+    reqBody.max_completion_tokens = maxTokens;
+  } else {
+    reqBody.max_tokens = maxTokens;
+    reqBody.temperature = 0.85;
+  }
+
   const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${OPENAI_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [{ role: 'system', content: persona }, ...history],
-      max_tokens: MAX_TOKENS,
-      temperature: 0.85,
-      stream: true,
-      stream_options: { include_usage: true },
-    }),
+    body: JSON.stringify(reqBody),
   });
   if (!aiRes.ok || !aiRes.body) {
     return res.status(200).json({
-      reply:
-        'The agent had trouble responding just now. Please try again in a moment.',
+      reply: secret
+        ? '助手暂时无法响应，请稍后再试。'
+        : 'The agent had trouble responding just now. Please try again in a moment.',
       system: true,
     });
   }
@@ -216,6 +299,9 @@ export default async function handler(
   }
   if (usage) {
     await addSpend(
+      spendKey,
+      priceIn,
+      priceOut,
       Number(usage.prompt_tokens || 0),
       Number(usage.completion_tokens || 0),
     );
