@@ -9,6 +9,7 @@ import {
 } from '../utils/worldMap';
 import { ActivityChart } from './ActivityChart';
 import { Guestbook } from './Guestbook';
+import { useIsDark } from '../utils/theme';
 
 export { MAP_TOKEN } from '../utils/mapToken';
 
@@ -29,28 +30,28 @@ type Palette = {
 const paletteFor = (dark: boolean): Palette =>
   dark
     ? {
-        ocean: '#0b1c2c',
-        border: '#8bbf56',
-        landBase: [43, 61, 79],
-        landHot: [234, 241, 248],
-        dot: '#bf568b',
-        dotGlow: 'rgba(191,86,139,0.30)',
-        ring: '#8bbf56',
-        text: '#cbd6e2',
-        muted: '#627e99',
-        accent: '#568bbf',
+        ocean: '#101112',
+        border: '#6e6b66',
+        landBase: [46, 45, 43],
+        landHot: [242, 238, 228],
+        dot: '#e46c56',
+        dotGlow: 'rgba(228,108,86,0.30)',
+        ring: '#6e6b66',
+        text: '#e2ded4',
+        muted: '#807c75',
+        accent: '#8caac6',
       }
     : {
-        ocean: '#eef3f7',
-        border: '#9bbf6b',
-        landBase: [176, 190, 203],
-        landHot: [18, 30, 41],
-        dot: '#c2477f',
-        dotGlow: 'rgba(194,71,127,0.22)',
-        ring: '#5a9e2f',
-        text: '#1c2b3a',
-        muted: '#6b7b8a',
-        accent: '#2f6da8',
+        ocean: '#ede9df',
+        border: '#a8a397',
+        landBase: [196, 191, 181],
+        landHot: [31, 29, 26],
+        dot: '#b63628',
+        dotGlow: 'rgba(182,54,40,0.22)',
+        ring: '#736f68',
+        text: '#2b2925',
+        muted: '#736f68',
+        accent: '#2c4e76',
       };
 
 const mix = (a: RGB, b: RGB, t: number): string =>
@@ -91,22 +92,6 @@ const computeHeat = (land: boolean[], points: VisitPoint[]): Float32Array => {
   return h;
 };
 
-const useDark = (): boolean => {
-  const get = () =>
-    typeof window !== 'undefined' &&
-    !!window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const [dark, setDark] = React.useState<boolean>(get);
-  React.useEffect(() => {
-    if (!window.matchMedia) return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const on = (e: MediaQueryListEvent) => setDark(e.matches);
-    mq.addEventListener?.('change', on);
-    return () => mq.removeEventListener?.('change', on);
-  }, []);
-  return dark;
-};
-
 // Synthetic 90-day series for demo mode (no backend yet).
 const demoDaily = (): Record<string, number> => {
   const out: Record<string, number> = {};
@@ -133,7 +118,7 @@ export const VisitorMap: React.FC = () => {
     null,
   );
 
-  const dark = useDark();
+  const dark = useIsDark();
   const P = paletteFor(dark);
 
   const [points, setPoints] = React.useState<VisitPoint[]>([]);
@@ -423,7 +408,7 @@ export const VisitorMap: React.FC = () => {
               position: 'absolute',
               left: clamp(hover.sx + 10, 0, 720),
               top: clamp(hover.sy + 10, 0, 9999),
-              background: dark ? 'rgba(11,28,44,0.94)' : 'rgba(255,255,255,0.94)',
+              background: dark ? 'rgba(16,17,18,0.94)' : 'rgba(245,242,234,0.94)',
               border: `1px solid ${P.accent}`,
               borderRadius: 4,
               padding: '2px 7px',

@@ -9,7 +9,7 @@ import axios from 'axios';
 import config from '../../config.json';
 import { HL, TAG, link } from './format';
 
-const MUTED = '#627e99';
+const MUTED = '#807c75';
 const SELECTED_SINCE = 2024; // `publications` shows this year onward
 const SELF = 'shiyang lai'; // author name to highlight
 

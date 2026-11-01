@@ -2,7 +2,7 @@ import config from '../../../config.json';
 
 const sumfetch = async (args: string[]): Promise<string> => {
   if (config.ascii === 'shiyang') {
-    return `                                                                     
+    return `<span class="ascii-fit" style="--cols:123">                                                                     
                          ▐▒▒▄                                ▒
                          ▐▓▓▓▒ ░░          ▄▄▓▓▓▓▓▓▓▄▄      ▐▒
                           ▓▓▓▓▓▒░░░░░    ▄██████▓  ▐▓▓▓▓▄░░ ▐▒
@@ -28,7 +28,7 @@ const sumfetch = async (args: string[]): Promise<string> => {
           ▀██████████▓▒▒▓▓▓▒▒▒▒▒▒▒▒▒▓▒▒▒▒▒▒▒░░░░░      ▐▓▓▒▒▒░░░░
            ▄▄▓▓██████▒▒▒▓▓▓▒▒▒▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▒░░░▒░██▓▓▒▒▒▒▒░▒░▐▒░▒░▄
             ▐░▒▒▒▒▒▒▒▒▀▀▀▀▀▀▀▀▀▀▀▒░▒▒▀▀▀▀▀▀▀▀▀▀▒▒▒▒▒▒▒░░░░░░▒▀▒▒░▒▒▒▒▒▒░░
-    `
+    </span>`
   }
 };
 

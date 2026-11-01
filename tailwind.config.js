@@ -4,8 +4,10 @@ module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
+    './src/utils/**/*.{js,ts,jsx,tsx}',
   ],
-  darkMode: 'media', // or 'media' or 'class'
+  // Night mode = `dark` class on <html>, toggled by src/utils/theme.ts.
+  darkMode: 'class',
   theme: {
     colors: {
       transparent: 'transparent',

@@ -18,47 +18,44 @@
   "projectsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/projects.md",
   "personaUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/persona.md",
   "publicationsUrl": "https://raw.githubusercontent.com/ShiyangLai/shiyanglai.github.io/main/publications.bib",
+  "desktop": {
+    "intervalMs": 6500,
+    "scenes": [
+      {
+        "art": "cocreation",
+        "title": "Human–AI co-creativity",
+        "question": "What AI and interaction designs keep humans and AI creating together, without the crowd's ideas collapsing into sameness?"
+      },
+      {
+        "art": "contradiction",
+        "title": "Self-contradiction",
+        "question": "Is contradiction the core of all innovation? Can an AI hold its own contradictions, and use them to break and rebuild itself?"
+      },
+      {
+        "art": "faces",
+        "title": "Many faces",
+        "question": "Do we have one self, or a set of faces? And how would we test that with data?"
+      }
+    ]
+  },
   "colors": {
     "dark": {
-      "background":"#0B1C2C",
-      "foreground":"#CBD6E2",
-      "ansiBlack":"#0B1C2C",
-      "ansiBlue":"#8B56BF",
-      "ansiBrightBlack":"#627E99",
-      "ansiBrightBlue":"#8B56BF",
-      "ansiBrightCyan":"#568BBF",
-      "ansiBrightGreen":"#56BF8B",
-      "ansiBrightMagenta":"#BF568B",
-      "ansiBrightRed":"#BF8B56",
-      "ansiBrightWhite":"#F7F9FB",
-      "ansiBrightYellow":"#8BBF56",
-      "ansiCyan":"#568BBF",
-      "ansiGreen":"#56BF8B",
-      "ansiMagenta":"#BF568B",
-      "ansiRed":"#BF8B56",
-      "ansiWhite":"#CBD6E2",
-      "ansiYellow":"#8BBF56"
+      "background":"#101112",
+      "foreground":"#E2DED4",
+      "yellow":"#E46C56",
+      "green":"#8CAAC6",
+      "gray":"#8F8B84",
+      "blue":"#8CAAC6",
+      "red":"#E46C56"
     },
     "light": {
-      "background":"#F7F9FB",
-      "foreground":"#405C79",
-      "ansiBlack":"#F7F9FB",
-      "ansiBlue":"#8B56BF",
-      "ansiBrightBlack":"#AABCCE",
-      "ansiBrightBlue":"#8B56BF",
-      "ansiBrightCyan":"#568BBF",
-      "ansiBrightGreen":"#56BF8B",
-      "ansiBrightMagenta":"#BF568B",
-      "ansiBrightRed":"#BF8B56",
-      "ansiBrightWhite":"#0B1C2C",
-      "ansiBrightYellow":"#8BBF56",
-      "ansiCyan":"#568BBF",
-      "ansiGreen":"#56BF8B",
-      "ansiMagenta":"#BF568B",
-      "ansiRed":"#BF8B56",
-      "ansiWhite":"#405C79",
-      "ansiYellow":"#8BBF56"
+      "background":"#F5F2EA",
+      "foreground":"#2B2925",
+      "yellow":"#B63628",
+      "green":"#2C4E76",
+      "gray":"#736F68",
+      "blue":"#2C4E76",
+      "red":"#B63628"
     }
   }
 }
-

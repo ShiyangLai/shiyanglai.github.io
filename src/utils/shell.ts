@@ -1,6 +1,7 @@
 import React from 'react';
 import * as bin from './bin';
 import { snapshotPrompt } from './vfs';
+import { Output } from '../components/history/interface';
 import {
   isAgentActive,
   isSecret,
@@ -13,7 +14,7 @@ import {
 
 export const shell = async (
   command: string,
-  setHistory: (value: string) => void,
+  setHistory: (value: Output) => void,
   clearHistory: () => void,
   setCommand: React.Dispatch<React.SetStateAction<string>>,
   appendEntry: (command: string, output: string, ps1: string) => number,

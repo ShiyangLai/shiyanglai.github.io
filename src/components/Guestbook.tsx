@@ -1,4 +1,5 @@
 import React from 'react';
+import { useIsDark } from '../utils/theme';
 
 export { GUESTBOOK_TOKEN } from '../utils/mapToken';
 
@@ -8,39 +9,23 @@ type Status = 'loading' | 'ready' | 'off';
 const NAME_MAX = 40;
 const MSG_MAX = 280;
 
-const useDark = (): boolean => {
-  const get = () =>
-    typeof window !== 'undefined' &&
-    !!window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const [dark, setDark] = React.useState<boolean>(get);
-  React.useEffect(() => {
-    if (!window.matchMedia) return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const on = (e: MediaQueryListEvent) => setDark(e.matches);
-    mq.addEventListener?.('change', on);
-    return () => mq.removeEventListener?.('change', on);
-  }, []);
-  return dark;
-};
-
 const paletteFor = (dark: boolean) =>
   dark
     ? {
-        text: '#cbd6e2',
-        muted: '#627e99',
-        accent: '#568bbf',
-        border: '#2b3d4f',
-        inputBorder: '#33485f',
-        rule: '#1c2c3c',
+        text: '#e2ded4',
+        muted: '#807c75',
+        accent: '#8caac6',
+        border: '#2e2d2b',
+        inputBorder: '#3a3937',
+        rule: '#1e1e1d',
       }
     : {
-        text: '#1c2b3a',
-        muted: '#6b7b8a',
-        accent: '#2f6da8',
-        border: '#c2cfdb',
-        inputBorder: '#c2cfdb',
-        rule: '#e2e9f0',
+        text: '#2b2925',
+        muted: '#736f68',
+        accent: '#2c4e76',
+        border: '#d3cec3',
+        inputBorder: '#d3cec3',
+        rule: '#e4dfd4',
       };
 
 const rel = (at: number): string => {
@@ -58,7 +43,7 @@ const rel = (at: number): string => {
 };
 
 export const Guestbook: React.FC<{ dark?: boolean }> = ({ dark: darkProp }) => {
-  const internalDark = useDark();
+  const internalDark = useIsDark();
   const dark = darkProp ?? internalDark;
   const P = paletteFor(dark);
 

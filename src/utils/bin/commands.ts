@@ -26,6 +26,8 @@ Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
 Type 'publications' (and 'cite <id>') to see my papers.
 Type 'ls', then 'cd' into a folder, to explore my projects.
+Click the green ● (top left) to step out of full screen and see my research.
+Type 'theme day' / 'theme night' (or click the switch, top right) to change the lights.
 Type 'map' to see where visitors are from.
 Type 'guestbook' to sign my guestbook.
 Type 'repo' to visit my GitHub homepage.
@@ -138,7 +140,7 @@ export const emacs = async (args?: string[]): Promise<string> => {
 
 // Banner
 export const banner = (args?: string[]): string => {
-  return `
+  return `<span class="ascii-fit" style="--cols:130">
   █████████ █████     ███                                       ███████████                             ███                  ████ 
  ███░░░░░██░░███     ░░░                                       ░█░░░███░░░█                            ░░░                  ░░███ 
 ░███    ░░░ ░███████ █████████ ██████████ ████████   ███████   ░   ░███  ██████ ████████ █████████████ ████████████   ██████ ░███ 
@@ -149,13 +151,13 @@ export const banner = (args?: string[]): string => {
  ░░░░░░░░░ ░░░░ ░░░░░░░░░ ░░░░░███░░░░░░░░░░░ ░░░░░ ░░░░░███      ░░░░░ ░░░░░░ ░░░░░    ░░░░░ ░░░ ░░░░░░░░░░░░ ░░░░░ ░░░░░░░░░░░░ 
                           ███ ░███                  ███ ░███                                                                      
                          ░░██████                  ░░██████                                                                       
-                          ░░░░░░                    ░░░░░░                                                                        
-
+                          ░░░░░░                    ░░░░░░                                                                        </span>
 Type 'help' to see the list of available commands.
 Type 'sumfetch' to display summary.
 Type 'news' to see my recent achievements.
 Type 'publications' (and 'cite <id>') to see my papers.
 Type 'ls', then 'cd' into a folder, to explore my projects.
+Click the green ● (top left) to step out of full screen and see my research.
 Type 'map' to see where visitors are from.
 Type 'guestbook' to sign my guestbook.
 Type 'repo' or click <u><a class="text-light-blue dark:text-dark-blue underline" href="${config.repo}" target="_blank">here</a></u> for my GitHub homepage.

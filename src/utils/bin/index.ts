@@ -5,4 +5,5 @@ export * from './map';
 export * from './guestbook';
 export * from './agent';
 export * from './publications';
+export * from './theme';
 export { default as sumfetch } from './sumfetch';
