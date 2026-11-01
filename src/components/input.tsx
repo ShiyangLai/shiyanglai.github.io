@@ -110,8 +110,8 @@ export const Input = ({
         type="text"
         className={`bg-light-background dark:bg-dark-background focus:outline-none flex-grow ${
           commandExists(command) || command === '' || isAgentActive()
-            ? 'text-dark-green'
-            : 'text-dark-red'
+            ? 'text-light-green dark:text-dark-green'
+            : 'text-light-red dark:text-dark-red'
         }`}
         value={command}
         onChange={onChange}

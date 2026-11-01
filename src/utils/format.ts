@@ -1,11 +1,11 @@
 // Shared inline-style text helpers for terminal command output.
 // Output is rendered via dangerouslySetInnerHTML, so colors use inline styles
-// with the theme's ansi colors (identical in light/dark, so they read on both
-// backgrounds). Tailwind classes are unreliable here because the Tailwind
+// (identical in light/dark, chosen to read on both the paper and the night
+// background of the drafting palette). Tailwind classes are unreliable here because the Tailwind
 // `content` glob does not scan src/utils.
-export const HL = '#BF568B'; // magenta accent — for **highlights**
-export const TAG = '#568BBF'; // cyan accent — for dates / names / dirs / links
-export const ORANGE = '#E0913C'; // warm orange accent — for call-to-action (e.g. `agent`)
+export const HL = '#C25A44'; // red ink — for **highlights**
+export const TAG = '#5E7FA0'; // blue-grey ink — for dates / names / dirs / links
+export const ORANGE = '#9C6A28'; // sepia — for call-to-action (e.g. `agent`)
 
 const LINK_CLASS = 'text-light-blue dark:text-dark-blue underline';
 

@@ -12,26 +12,26 @@ const fmt = (iso: string): string => {
 const themeFor = (dark: boolean) =>
   dark
     ? {
-        bg: '#0b1c2c',
-        grid: '#33485f',
+        bg: '#101112',
+        grid: '#3a3937',
         // curve matches the map's "hot" color: whiter in dark mode
-        area: 'rgba(234,241,248,0.16)',
-        line: '#eaf1f8',
-        text: '#cbd6e2',
-        muted: '#627e99',
-        accent: '#bf568b',
-        tip: 'rgba(11,28,44,0.95)',
+        area: 'rgba(242,238,228,0.16)',
+        line: '#f2eee4',
+        text: '#e2ded4',
+        muted: '#807c75',
+        accent: '#e46c56',
+        tip: 'rgba(16,17,18,0.95)',
       }
     : {
-        bg: '#eef3f7',
-        grid: '#c2cfdb',
+        bg: '#ede9df',
+        grid: '#d3cec3',
         // curve matches the map's "hot" color: darker in light mode
-        area: 'rgba(18,30,41,0.14)',
-        line: '#121e29',
-        text: '#1c2b3a',
-        muted: '#6b7b8a',
-        accent: '#c2477f',
-        tip: 'rgba(255,255,255,0.95)',
+        area: 'rgba(31,29,26,0.14)',
+        line: '#1f1d1a',
+        text: '#2b2925',
+        muted: '#736f68',
+        accent: '#b63628',
+        tip: 'rgba(245,242,234,0.95)',
       };
 
 export const ActivityChart: React.FC<{

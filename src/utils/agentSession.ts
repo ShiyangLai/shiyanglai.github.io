@@ -88,8 +88,8 @@ const labelName = (): string => (secret ? '助手' : LABEL);
 export const youLabel = (): string => (secret ? '你' : 'you');
 export const thinkingHtml = (): string =>
   secret
-    ? '<span style="color:#627e99">思考中…</span>'
-    : '<span style="color:#627e99">thinking…</span>';
+    ? '<span style="color:#807c75">思考中…</span>'
+    : '<span style="color:#807c75">thinking…</span>';
 const SECRET_WELCOME_FALLBACK = '<b>已进入秘密模式。</b>问我任何问题吧。';
 
 // LLM output is rendered via dangerouslySetInnerHTML, so escape it. Server-sent

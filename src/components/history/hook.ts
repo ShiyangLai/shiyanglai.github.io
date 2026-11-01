@@ -1,5 +1,5 @@
 import React from 'react';
-import { History } from './interface';
+import { History, Output } from './interface';
 import { getPromptSnapshot } from '../../utils/vfs';
 
 export const useHistory = (defaultValue: Array<History>) => {
@@ -9,7 +9,7 @@ export const useHistory = (defaultValue: Array<History>) => {
   const idRef = React.useRef<number>(defaultValue.length);
 
   // Append an entry and return its id (so streaming output can update it later).
-  const append = (cmd: string, output: string, ps1: string): number => {
+  const append = (cmd: string, output: Output, ps1: string): number => {
     const id = idRef.current++;
     setHistory((prev) => [
       ...prev,
@@ -22,7 +22,7 @@ export const useHistory = (defaultValue: Array<History>) => {
     history,
     command,
     lastCommandIndex,
-    setHistory: (value: string) => append(command, value, getPromptSnapshot()),
+    setHistory: (value: Output) => append(command, value, getPromptSnapshot()),
     appendEntry: (cmd: string, output: string, ps1: string) =>
       append(cmd, output, ps1),
     updateEntry: (id: number, output: string) =>

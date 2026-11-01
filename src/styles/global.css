@@ -26,16 +26,66 @@ div#__next > div {
   height: 10px;
 }
 
+/* Terminal popping out of full screen into a window (desktop mode). Uses the
+   `scale` property, not `transform`, so it doesn't fight the drag offset. */
+@keyframes window-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+.window-in {
+  animation: window-in 220ms ease-out;
+}
+
+/* Wide ASCII art (banner, sumfetch) shrinks to fit a windowed terminal
+   instead of wrapping. `--cols` is the art's width in characters; Hack's
+   advance width is ~0.6em. Only applies inside the `.cq` container. */
+.ascii-fit {
+  display: block;
+  white-space: pre;
+}
+
+.cq {
+  container-type: inline-size;
+}
+
+.cq .ascii-fit {
+  font-size: min(1em, calc(100cqw / (var(--cols) * 0.62)));
+}
+
+/* Day / night scrollbar (night = `dark` class on <html>). */
 ::-webkit-scrollbar-track {
-  background: #1e252e;
+  background: #ebe7dd;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ebdbb2;
+  background: #c9c3b6;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff8037;
+  background: #736f68;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #1b1c1d;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #4a4845;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #736f68;
 }

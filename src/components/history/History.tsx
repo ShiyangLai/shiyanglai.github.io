@@ -30,7 +30,9 @@ export const History: React.FC<{ history: Array<HistoryInterface> }> = ({
             <div className="flex-grow">{entry.command}</div>
           </div>
 
-          {entry.output === MAP_TOKEN ? (
+          {typeof entry.output !== 'string' ? (
+            <div className="mb-2">{entry.output}</div>
+          ) : entry.output === MAP_TOKEN ? (
             <VisitorMap />
           ) : entry.output === GUESTBOOK_TOKEN ? (
             <Guestbook />
