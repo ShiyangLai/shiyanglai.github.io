@@ -9,6 +9,7 @@
 # Example:
 #     2026-05-29 | Awarded the XYZ Fellowship | https://example.com
 
+2026-11 | Our paper <i>Multi-LLM Systems Exhibit Robust Semantic Collapse</i> (co-first author) was accepted to **Nature Machine Intelligence**! | https://arxiv.org/abs/2605.17193
 2026-05 | My beloved UChicago Sociology cohort voted me **"Most Likely to Be the Scientist in a Sci-Fi Movie."** I'm choosing to read this as a compliment, not a warning. Still no fellowship from OpenAI, Google, or Anthropic — but at least my villain origin story is now peer-reviewed.
 2026-05 | Our paper <i>Investigating the Link Between Representational Similarity and Model Interactions</i> was accepted to **ICML 2026**!
 2026-04 | I received a **$3,500** award from the Sociology Henderson Fund at UChicago.
